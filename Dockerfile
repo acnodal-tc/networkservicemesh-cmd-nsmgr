@@ -9,6 +9,9 @@ RUN tar xzvf spire-1.2.2-linux-x86_64-glibc.tar.gz -C /bin --strip=2 spire-1.2.2
 
 
 FROM go as build
+COPY ./build-tmp/api/ /api
+COPY ./build-tmp/sdk/ /sdk
+COPY ./build-tmp/sdk-k8s/ /sdk-k8s
 WORKDIR /build
 COPY go.mod go.sum ./
 COPY ./local ./local
