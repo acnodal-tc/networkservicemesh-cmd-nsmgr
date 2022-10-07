@@ -72,7 +72,7 @@ func main() {
 		logger.Fatalf("error processing cfg from env: %+v", err)
 	}
 
-	logger.Infof("Using configuration: %v", cfg)
+	logger.Infof("Using configuration: %#v", cfg)
 
 	level, err := logrus.ParseLevel(cfg.LogLevel)
 	if err != nil {
