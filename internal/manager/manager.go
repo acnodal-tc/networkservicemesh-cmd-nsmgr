@@ -112,7 +112,15 @@ func RunNsmgr(ctx context.Context, configuration *config.Config) error {
 		return err
 	}
 
-	u := genPublishableURL(configuration.ListenOn, m.logger)
+	// Figure out the URL we'll tell other processes to use to talk to
+	// us. If the user has configured it then we'll use that, but if not
+	// we'll try to figure out a good value from the available
+	// addresses.
+	publicURL := configuration.PublicURL
+	if publicURL.Scheme == "unset" {
+		publicURL = genPublishableURL(configuration.ListenOn, m.logger)
+	}
+	logger.Infof("PublicURL: %s", publicURL)
 
 	tlsClientConfig := tlsconfig.MTLSClientConfig(m.source, m.source, tlsconfig.AuthorizeAny())
 	tlsClientConfig.MinVersion = tls.VersionTLS12
@@ -121,7 +129,7 @@ func RunNsmgr(ctx context.Context, configuration *config.Config) error {
 	spiffeIDConnMap := spire.SpiffeIDConnectionMap{}
 	mgrOptions := []nsmgr.Option{
 		nsmgr.WithName(configuration.Name),
-		nsmgr.WithURL(u.String()),
+		nsmgr.WithURL(publicURL.String()),
 		nsmgr.WithAuthorizeServer(authorize.NewServer(authorize.WithSpiffeIDConnectionMap(&spiffeIDConnMap))),
 		nsmgr.WithAuthorizeMonitorConnectionServer(authmonitor.NewMonitorConnectionServer(authmonitor.WithSpiffeIDConnectionMap(&spiffeIDConnMap))),
 		nsmgr.WithDialTimeout(configuration.DialTimeout),
